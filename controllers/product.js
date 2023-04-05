@@ -28,8 +28,14 @@ export const getAllProducts = asyncError(async (req, res, next) => {
 	// Search & Category query
 	const { keyword, category } = req.query
 
+	const query = {}
+	if (category) {
+		query.category = category
+	}
+	query.category = { $ne: '' }
+
 	const products = await Product.find({
-		$or: [{ category: { $exists: false } }, { category: '' }],
+		...query,
 		name: {
 			$regex: keyword ? keyword : '',
 			$options: 'i',
