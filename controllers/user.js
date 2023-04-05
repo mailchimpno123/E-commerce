@@ -114,7 +114,9 @@ export const changePassword = asyncError(async (req, res, next) => {
 export const updatePic = asyncError(async (req, res, next) => {
 	const user = await User.findById(req.user._id)
 	const file = getDataUri(req.file)
-	await cloudinary.v2.uploader.destroy(user.avatar.public_id)
+	if (user.avatar.public_id) {
+		await cloudinary.v2.uploader.destroy(user.avatar.public_id)
+	}
 	const myCloud = await cloudinary.v2.uploader.upload(file.content)
 	user.avatar = {
 		public_id: myCloud.public_id,
