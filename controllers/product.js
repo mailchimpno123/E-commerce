@@ -5,17 +5,35 @@ import { getDataUri } from '../utils/features.js'
 import cloudinary from 'cloudinary'
 import { Category } from '../models/category.js'
 
+// export const getAllProducts = asyncError(async (req, res, next) => {
+// 	// Search & Category query
+
+// 	const { keyword, category } = req.query
+
+// 	const products = await Product.find({
+// 		name: {
+// 			$regex: keyword ? keyword : '',
+// 			$options: 'i',
+// 		},
+// 		category: category ? category : undefined,
+// 	})
+
+// 	res.status(200).json({
+// 		success: true,
+// 		products,
+// 	})
+// })
+
 export const getAllProducts = asyncError(async (req, res, next) => {
 	// Search & Category query
-
 	const { keyword, category } = req.query
 
 	const products = await Product.find({
+		$or: [{ category: { $exists: false } }, { category: '' }],
 		name: {
 			$regex: keyword ? keyword : '',
 			$options: 'i',
 		},
-		category: category ? category : undefined,
 	})
 
 	res.status(200).json({
