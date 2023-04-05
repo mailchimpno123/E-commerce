@@ -111,34 +111,10 @@ export const changePassword = asyncError(async (req, res, next) => {
 	})
 })
 
-// export const updatePic = asyncError(async (req, res, next) => {
-// 	const user = await User.findById(req.user._id)
-// 	const file = getDataUri(req.file)
-// 	await cloudinary.v2.uploader.destroy(user.avatar.public_id)
-// 	const myCloud = await cloudinary.v2.uploader.upload(file.content)
-// 	user.avatar = {
-// 		public_id: myCloud.public_id,
-// 		url: myCloud.secure_url,
-// 	}
-// 	await user.save()
-// 	res.status(200).json({
-// 		success: true,
-// 		message: 'Avatar Updated Successfully',
-// 	})
-// })
-
 export const updatePic = asyncError(async (req, res, next) => {
 	const user = await User.findById(req.user._id)
 	const file = getDataUri(req.file)
-
-	// Check if public_id is provided in the form data
-	const public_id = req.body.public_id || user.avatar.public_id
-
-	// If public_id is present, delete the previous avatar
-	if (public_id) {
-		await cloudinary.v2.uploader.destroy(public_id)
-	}
-
+	await cloudinary.v2.uploader.destroy(user.avatar.public_id)
 	const myCloud = await cloudinary.v2.uploader.upload(file.content)
 	user.avatar = {
 		public_id: myCloud.public_id,
