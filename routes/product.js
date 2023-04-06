@@ -12,12 +12,13 @@ import {
 	getAllCategories,
 	getAllProducts,
 	getProductDetails,
+	queryProduct,
 	updateProduct,
 } from '../controllers/product.js'
 
 const router = express.Router()
 
-router.get('/all', getAllProducts)
+router.get('/all', getAllProducts, queryProduct)
 router.get('/admin', isAuthenticated, isAdmin, getAdminProducts)
 
 router
