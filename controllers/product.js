@@ -69,7 +69,7 @@ export const getProductDetails = asyncError(async (req, res, next) => {
 export const createProduct = asyncError(async (req, res, next) => {
 	const { name, description, category, price, stock } = req.body
 
-	if (!req.file) return next(new ErrorHandler('Please add image', 400))
+	// if (!req.file) return next(new ErrorHandler('Please add image', 400))
 
 	const file = getDataUri(req.file)
 	const myCloud = await cloudinary.v2.uploader.upload(file.content)
