@@ -93,39 +93,45 @@ export const getProductDetails = asyncError(async (req, res, next) => {
 // 	})
 // })
 
-export const createProduct = asyncError(async (req, res, next) => {
+export const createProduct = asyncHandler(async (req, res) => {
 	const { name, description, category, price, stock } = req.body
 
-	// Look up the Category by name, or create a new one if it doesn't exist
-	let foundCategory = await Category.findOne({ name: category })
-	if (!foundCategory) {
-		foundCategory = await Category.create({
-			name: category,
-			description: '',
-		})
+	let image
+	if (req.file) {
+		const file = getDataUri(req.file)
+		const myCloud = await cloudinary.v2.uploader.upload(file.content)
+		image = {
+			public_id: myCloud.public_id,
+			url: myCloud.secure_url,
+		}
 	}
 
-	// Handle the file upload as before
-	const file = getDataUri(req.file)
-	const myCloud = await cloudinary.v2.uploader.upload(file.content)
-	const image = {
-		public_id: myCloud.public_id,
-		url: myCloud.secure_url,
+	let categoryId
+	if (category) {
+		const existingCategory = await Category.findOne({ name: category })
+		if (existingCategory) {
+			categoryId = existingCategory._id
+		} else {
+			const newCategory = await Category.create({ name: category })
+			categoryId = newCategory._id
+		}
 	}
 
-	// Create the new Product with the Category _id
-	const newProduct = await Product.create({
+	const product = new Product({
 		name,
 		description,
-		category: foundCategory._id,
 		price,
 		stock,
-		images: [image],
+		images: image ? [image] : [],
+		category: categoryId,
 	})
 
-	res.status(200).json({
+	await product.save()
+
+	res.status(201).json({
 		success: true,
-		message: 'Product Created Successfully',
+		message: 'Product created successfully',
+		data: product,
 	})
 })
 
