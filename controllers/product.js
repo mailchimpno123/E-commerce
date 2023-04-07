@@ -93,7 +93,7 @@ export const getProductDetails = asyncError(async (req, res, next) => {
 // 	})
 // })
 
-export const createProduct = asyncHandler(async (req, res) => {
+export const createProduct = asyncError(async (req, res) => {
 	const { name, description, category, price, stock } = req.body
 
 	let image
