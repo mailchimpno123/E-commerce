@@ -5,6 +5,7 @@ import { getDataUri } from '../utils/features.js'
 import cloudinary from 'cloudinary'
 import { Category } from '../models/category.js'
 
+// ** Works only with category **
 // export const getAllProducts = asyncError(async (req, res, next) => {
 // 	// Search & Category query
 
@@ -24,31 +25,64 @@ import { Category } from '../models/category.js'
 // 	})
 // })
 
-export const getAllProducts = asyncError(async (req, res, next) => {
-	let { keyword, category } = req.query
+// ** Works only with keyword **
+// export const getAllProducts = asyncError(async (req, res, next) => {
+// 	let { keyword, category } = req.query
 
-	const query = {}
+// 	const query = {}
+
+// 	if (keyword) {
+// 		query.name = { $regex: keyword, $options: 'i' }
+// 	}
+
+// 	if (category) {
+// 		const categoryRegex = new RegExp(category, 'i')
+// 		const categoryObj = await Category.findOne({ name: categoryRegex })
+
+// 		if (!categoryObj) {
+// 			return res
+// 				.status(400)
+// 				.json({ success: false, error: 'Invalid category' })
+// 		}
+
+// 		query.category = categoryObj._id
+// 	}
+
+// 	const products = await Product.find(query)
+// 		.populate('category', 'name')
+// 		.exec()
+
+// 	res.status(200).json({
+// 		success: true,
+// 		products,
+// 	})
+// })
+
+export const getAllProducts = asyncError(async (req, res, next) => {
+	const { keyword, category } = req.query
+
+	let query = {}
 
 	if (keyword) {
-		query.name = { $regex: keyword, $options: 'i' }
+		query.name = {
+			$regex: keyword,
+			$options: 'i',
+		}
 	}
 
 	if (category) {
-		const categoryRegex = new RegExp(category, 'i')
-		const categoryObj = await Category.findOne({ name: categoryRegex })
+		const categoryObj = await Category.findOne({
+			category: { $regex: category, $options: 'i' },
+		})
 
-		if (!categoryObj) {
-			return res
-				.status(400)
-				.json({ success: false, error: 'Invalid category' })
+		if (categoryObj) {
+			query.category = categoryObj._id
+		} else {
+			query.category = null
 		}
-
-		query.category = categoryObj._id
 	}
 
-	const products = await Product.find(query)
-		.populate('category', 'name')
-		.exec()
+	const products = await Product.find(query).populate('category')
 
 	res.status(200).json({
 		success: true,
