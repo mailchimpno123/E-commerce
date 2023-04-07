@@ -66,30 +66,80 @@ export const getProductDetails = asyncError(async (req, res, next) => {
 	})
 })
 
+// export const createProduct = asyncError(async (req, res, next) => {
+// 	const { name, description, category, price, stock } = req.body
+
+// 	if (!req.file) return next(new ErrorHandler('Please add image', 400))
+
+// 	const file = getDataUri(req.file)
+// 	const myCloud = await cloudinary.v2.uploader.upload(file.content)
+// 	const image = {
+// 		public_id: myCloud.public_id,
+// 		url: myCloud.secure_url,
+// 	}
+
+// 	await Product.create({
+// 		name,
+// 		description,
+// 		category,
+// 		price,
+// 		stock,
+// 		images: [image],
+// 	})
+
+// 	res.status(200).json({
+// 		success: true,
+// 		message: 'Product Created Successfully',
+// 	})
+// })
+
 export const createProduct = asyncError(async (req, res, next) => {
 	const { name, description, category, price, stock } = req.body
 
-	// if (!req.file) return next(new ErrorHandler('Please add image', 400))
+	let images = []
 
-	const file = getDataUri(req.file)
-	const myCloud = await cloudinary.v2.uploader.upload(file.content)
-	const image = {
-		public_id: myCloud.public_id,
-		url: myCloud.secure_url,
+	// Check if a file was included in the request
+	if (req.file) {
+		// Convert the file to a data URI and upload it to Cloudinary
+		const file = getDataUri(req.file)
+		const myCloud = await cloudinary.v2.uploader.upload(file.content)
+
+		// Create an image object with the Cloudinary public ID and URL
+		const image = {
+			public_id: myCloud.public_id,
+			url: myCloud.secure_url,
+		}
+
+		// Add the image object to the images array
+		images.push(image)
 	}
 
-	await Product.create({
+	// Check if the category is an object with name and description properties
+	if (typeof category === 'object' && category !== null) {
+		// Create a new category document using the name and description properties
+		const newCategory = await Category.create({
+			name: category.name,
+			description: category.description,
+		})
+
+		// Set the category property of the request body to the _id of the newly created category document
+		req.body.category = newCategory._id
+	}
+
+	// Create the new product document
+	const product = await Product.create({
 		name,
 		description,
 		category,
 		price,
 		stock,
-		images: [image],
+		images,
 	})
 
 	res.status(200).json({
 		success: true,
-		message: 'Product Created Successfully',
+		message: 'Product created successfully',
+		product,
 	})
 })
 
