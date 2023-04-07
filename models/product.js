@@ -59,7 +59,12 @@ const schema = new mongoose.Schema(
 			required: true,
 			min: 0,
 		},
-		images: [imageSchema],
+		images: [
+			{
+				public_id: String,
+				url: String,
+			},
+		],
 	},
 	{ timestamps: true }
 )
