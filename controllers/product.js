@@ -66,64 +66,26 @@ export const getProductDetails = asyncError(async (req, res, next) => {
 	})
 })
 
-// export const createProduct = asyncError(async (req, res, next) => {
-// 	const { name, description, category, price, stock } = req.body
-
-// 	if (!req.file) return next(new ErrorHandler('Please add image', 400))
-
-// 	const file = getDataUri(req.file)
-// 	const myCloud = await cloudinary.v2.uploader.upload(file.content)
-// 	const image = {
-// 		public_id: myCloud.public_id,
-// 		url: myCloud.secure_url,
-// 	}
-
-// 	await Product.create({
-// 		name,
-// 		description,
-// 		category,
-// 		price,
-// 		stock,
-// 		images: [image],
-// 	})
-
-// 	res.status(200).json({
-// 		success: true,
-// 		message: 'Product Created Successfully',
-// 	})
-// })
-
 export const createProduct = asyncError(async (req, res, next) => {
-	const { name, description, category: categoryName, price, stock } = req.body
+	const { name, description, category, price, stock } = req.body
 
-	// Check if the category exists or create a new category if it doesn't
-	let category = await Category.findOne({ name: categoryName })
-	if (!category) {
-		category = await Category.create({ name: categoryName })
+	if (!req.file) return next(new ErrorHandler('Please add image', 400))
+
+	const file = getDataUri(req.file)
+	const myCloud = await cloudinary.v2.uploader.upload(file.content)
+	const image = {
+		public_id: myCloud.public_id,
+		url: myCloud.secure_url,
 	}
 
-	// Prepare the product object
-	const product = new Product({
+	await Product.create({
 		name,
 		description,
-		category: category._id, // Use the category's ID
+		category,
 		price,
 		stock,
+		images: [image],
 	})
-
-	// Add the image if available
-	if (req.file) {
-		const file = getDataUri(req.file)
-		const myCloud = await cloudinary.v2.uploader.upload(file.content)
-		const image = {
-			public_id: myCloud.public_id,
-			url: myCloud.secure_url,
-		}
-		product.images.push(image)
-	}
-
-	// Save the product
-	await product.save()
 
 	res.status(200).json({
 		success: true,
