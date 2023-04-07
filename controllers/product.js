@@ -5,18 +5,50 @@ import { getDataUri } from '../utils/features.js'
 import cloudinary from 'cloudinary'
 import { Category } from '../models/category.js'
 
+// export const getAllProducts = asyncError(async (req, res, next) => {
+// 	// Search & Category query
+
+// 	const { keyword, category } = req.query
+
+// 	const products = await Product.find({
+// 		name: {
+// 			$regex: keyword ? keyword : '',
+// 			$options: 'i',
+// 		},
+// 		category: category ? category : undefined,
+// 	})
+
+// 	res.status(200).json({
+// 		success: true,
+// 		products,
+// 	})
+// })
+
 export const getAllProducts = asyncError(async (req, res, next) => {
-	// Search & Category query
+	let { keyword, category } = req.query
 
-	const { keyword, category } = req.query
+	const query = {}
 
-	const products = await Product.find({
-		name: {
-			$regex: keyword ? keyword : '',
-			$options: 'i',
-		},
-		category: category ? category : undefined,
-	})
+	if (keyword) {
+		query.name = { $regex: keyword, $options: 'i' }
+	}
+
+	if (category) {
+		const categoryRegex = new RegExp(category, 'i')
+		const categoryObj = await Category.findOne({ name: categoryRegex })
+
+		if (!categoryObj) {
+			return res
+				.status(400)
+				.json({ success: false, error: 'Invalid category' })
+		}
+
+		query.category = categoryObj._id
+	}
+
+	const products = await Product.find(query)
+		.populate('category', 'name')
+		.exec()
 
 	res.status(200).json({
 		success: true,
