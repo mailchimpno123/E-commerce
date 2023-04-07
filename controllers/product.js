@@ -93,45 +93,41 @@ export const getProductDetails = asyncError(async (req, res, next) => {
 // 	})
 // })
 
-export const createProduct = asyncError(async (req, res) => {
-	const { name, description, category, price, stock } = req.body
+export const createProduct = asyncError(async (req, res, next) => {
+	const { name, description, category: categoryName, price, stock } = req.body
 
-	let image
-	if (req.file) {
-		const file = getDataUri(req.file)
-		const myCloud = await cloudinary.v2.uploader.upload(file.content)
-		image = {
-			public_id: myCloud.public_id,
-			url: myCloud.secure_url,
-		}
+	// Check if the category exists or create a new category if it doesn't
+	let category = await Category.findOne({ name: categoryName })
+	if (!category) {
+		category = await Category.create({ name: categoryName })
 	}
 
-	let categoryId
-	if (category) {
-		const existingCategory = await Category.findOne({ name: category })
-		if (existingCategory) {
-			categoryId = existingCategory._id
-		} else {
-			const newCategory = await Category.create({ name: category })
-			categoryId = newCategory._id
-		}
-	}
-
+	// Prepare the product object
 	const product = new Product({
 		name,
 		description,
+		category: category._id, // Use the category's ID
 		price,
 		stock,
-		images: image ? [image] : [],
-		category: categoryId,
 	})
 
+	// Add the image if available
+	if (req.file) {
+		const file = getDataUri(req.file)
+		const myCloud = await cloudinary.v2.uploader.upload(file.content)
+		const image = {
+			public_id: myCloud.public_id,
+			url: myCloud.secure_url,
+		}
+		product.images.push(image)
+	}
+
+	// Save the product
 	await product.save()
 
-	res.status(201).json({
+	res.status(200).json({
 		success: true,
-		message: 'Product created successfully',
-		data: product,
+		message: 'Product Created Successfully',
 	})
 })
 

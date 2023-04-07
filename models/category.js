@@ -9,19 +9,11 @@ import mongoose from 'mongoose'
 
 // export const Category = mongoose.model('Category', schema)
 
-const schema = new mongoose.Schema(
-	{
-		name: {
-			type: String,
-			required: true,
-			unique: true,
-		},
-		description: {
-			type: String,
-			required: true,
-		},
+const schema = new mongoose.Schema({
+	name: {
+		type: String,
+		required: true,
 	},
-	{ timestamps: true }
-)
+})
 
 export const Category = mongoose.model('Category', schema)
