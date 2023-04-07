@@ -96,29 +96,21 @@ export const getProductDetails = asyncError(async (req, res, next) => {
 export const createProduct = asyncError(async (req, res, next) => {
 	const { name, description, category, price, stock } = req.body
 
-	let categoryObj
-	if (typeof category === 'string') {
-		// category is an existing category id
-		categoryObj = category
-	} else if (category) {
-		// category is a new category object
-		categoryObj = await Category.create(category)
-	}
-
-	const file = getDataUri(req.file)
-	const myCloud = await cloudinary.v2.uploader.upload(file.content)
-	const image = {
-		public_id: myCloud.public_id,
-		url: myCloud.secure_url,
+	const image = {}
+	if (req.file) {
+		const file = getDataUri(req.file)
+		const myCloud = await cloudinary.v2.uploader.upload(file.content)
+		image.public_id = myCloud.public_id
+		image.url = myCloud.secure_url
 	}
 
 	await Product.create({
 		name,
 		description,
-		category: categoryObj,
+		category,
 		price,
 		stock,
-		images: [image],
+		images: image.public_id ? [image] : [],
 	})
 
 	res.status(200).json({
