@@ -55,7 +55,7 @@ const schema = new mongoose.Schema({
 		default: 'COD',
 	},
 	paidAt: Date,
-	payentInfo: {
+	paymentInfo: {
 		id: String,
 		status: String,
 	},
