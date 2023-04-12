@@ -4,15 +4,45 @@ import { Product } from '../models/product.js'
 import ErrorHandler from '../utils/error.js'
 import { stripe } from '../server.js'
 
-export const processPayment = asyncError(async (req, res, nect) => {
-	const { totalAmount } = req.body
-	const { client_secret } = await stripe.paymentIntents.create({
-		amount: Number(totalAmount * 100),
-		currency: 'usd',
-	})
+// export const processPayment = asyncError(async (req, res, next) => {
+// 	const { totalAmount } = req.body
+// 	const { client_secret } = await stripe.paymentIntents.create({
+// 		amount: Number(totalAmount * 100),
+// 		currency: 'usd',
+// 	})
+// 	res.status(200).json({
+// 		success: true,
+// 		client_secret,
+// 	})
+// })
+
+export const processPayment = asyncError(async (req, res, next) => {
+	const { totalAmount, paymentMethod } = req.body
+
+	if (paymentMethod === 'ONLINE') {
+		const { client_secret, payment_intent } =
+			await stripe.paymentIntents.create({
+				amount: Number(totalAmount * 100),
+				currency: 'usd',
+				payment_method_types: ['card'],
+			})
+
+		res.status(200).json({
+			success: true,
+			client_secret,
+		})
+
+		return
+	}
+
+	// payment method is COD, do not create payment intent
+	const paymentInfo = {
+		paymentMethodType: paymentMethod,
+	}
+
 	res.status(200).json({
 		success: true,
-		client_secret,
+		paymentInfo,
 	})
 })
 
