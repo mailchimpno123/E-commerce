@@ -66,7 +66,7 @@ export const getAllProducts = asyncError(async (req, res, next) => {
 	if (keyword) {
 		query.name = {
 			$regex: keyword,
-			$options: 'i',
+			$options: 'i', // Not required
 		}
 	}
 
