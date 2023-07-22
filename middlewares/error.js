@@ -12,6 +12,6 @@ export const errorMiddleware = (err, req, res, next) => { // No next
 	res.status(err.statusCode).json({ success: false, message: err.message })
 }
 
-export const asyncError = (passedFunction) => (req, res, next) => {
+export const asyncError = (passedFunction) => (req, res, next) => { // Change passedFuncuon + No next
 	Promise.resolve(passedFunction(req, res, next)).catch(next)
 }
