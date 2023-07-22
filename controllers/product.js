@@ -191,6 +191,9 @@ export const addProductImage = asyncError(async (req, res, next) => {
 		public_id: myCloud.public_id,
 		url: myCloud.secure_url,
 	}
+	
+// ** Should add a check if pic already exists
+// add or replace?
 
 	product.images.push(image)
 	await product.save()
