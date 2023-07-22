@@ -138,7 +138,7 @@ export const createProduct = asyncError(async (req, res, next) => {
 	if (!req.file) return next(new ErrorHandler('Please add image', 400))
 
 	const file = getDataUri(req.file)
-	const myCloud = await cloudinary.v2.uploader.upload(file.content)
+	const myCloud = await cloudinary.v2.uploader.upload(file.content) // This souldn't be required
 	const image = {
 		public_id: myCloud.public_id,
 		url: myCloud.secure_url,
